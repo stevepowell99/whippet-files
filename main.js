@@ -4303,6 +4303,39 @@ function webEditorLabelFromUrl(url) {
   return '';
 }
 
+/**
+ * Which document a doc-window URL shows, or null when it names none: a local gmist file by its path
+ * (`/open?path=`, or the `lf_` id gmist redirects to, which is base64url of the same path), a Google
+ * file by its `/d/<id>`. Two URLs with one key are one document.
+ */
+function webEditorDocKey(url) {
+  try {
+    const u = new URL(String(url || ''));
+    const lf = /\/lf_([A-Za-z0-9_-]+)(?:\/|$)/.exec(u.pathname);
+    const local = u.searchParams.get('path') || (lf && Buffer.from(lf[1], 'base64url').toString('utf8'));
+    if (local) return 'file:' + path.normalize(local).toLowerCase();
+    const d = /\/d\/([A-Za-z0-9_-]{10,})(?:\/|$)/.exec(u.pathname);
+    if (d) return 'id:' + d[1];
+  } catch (_) {}
+  return null;
+}
+
+/**
+ * The open doc window of this kind already showing the document `url` names, parked or not. Judged on
+ * the page the window shows now, so a window navigated away from the file it was opened on is not it.
+ */
+function webEditorWindowShowing(kind, url) {
+  const key = webEditorDocKey(url);
+  if (!key) return null;
+  for (const w of BrowserWindow.getAllWindows()) {
+    if (!w || w.isDestroyed() || w.webEditClosed || w.webEditKind !== kind) continue;
+    const wc = w.webEditContentWc;
+    const shown = (wc && !wc.isDestroyed() && wc.getURL()) || w.webEditOpenedUrl;
+    if (webEditorDocKey(shown) === key) return w;
+  }
+  return null;
+}
+
 const GOOGLE_WORKSPACE_TOOLBAR_PX = 40;
 /** Child doc windows can otherwise be resized to a needle-thin strip — hard to hit title bar / taskbar restore. */
 const GOOGLE_WORKSPACE_WINDOW_MIN_W = 820;
@@ -4527,6 +4560,13 @@ function openWebEditorWindow(parentWin, targetUrl, kindKey, { label } = {}) {
   registerWebEditorToolbarIpcOnce();
   const url = String(targetUrl || '').trim();
   if (!kind.allowUrl(url)) return { ok: false, error: kind.badUrlError };
+  /* One window per document: a second gmist window on the same file is refused by gmist's file lock
+     ("Already open in another window"), so bring back the one that has it, out of the tray if parked. */
+  const existing = webEditorWindowShowing(kind, url);
+  if (existing) {
+    unparkWebEditorWindow(existing);
+    return { ok: true, raised: true };
+  }
   const saved = loadWebEditorBoundsFromDisk(kind);
   const fallback = defaultWebEditorWindowBounds();
   const use =
@@ -4549,6 +4589,7 @@ function openWebEditorWindow(parentWin, targetUrl, kindKey, { label } = {}) {
     },
   });
   win.webEditKind = kind;
+  win.webEditOpenedUrl = url;
   attachWebEditorWindowBoundsPersistence(win, kind);
   win.on('minimize', () => parkWebEditorWindow(win));
   win.on('show', () => {

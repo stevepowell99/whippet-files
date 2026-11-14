@@ -1,9 +1,9 @@
 // The doc tray: a doc window minimised the way its title-bar button does it (WM_SYSCOMMAND SC_MINIMIZE) is
 // hidden, so Windows draws no stub on the desktop, and parks as a pill beside the Shelf; the pill restores it
-// and its x closes it.
+// and its x closes it. Opening a file that already has a doc window raises that window, parked or not.
 //
 // By hand only: it shows a gmist window on screen for a few seconds, and needs the local gmist on 5173 (it
-// loads a page that does not exist there, so gmist opens no file). Run: node test/manual-doc-tray.cjs
+// asks for a file that does not exist, so gmist opens nothing). Run: node test/manual-doc-tray.cjs
 const { connect, sleep } = require('./harness.cjs');
 const koffi = require('koffi');
 const user32 = koffi.load('user32.dll');
@@ -16,6 +16,10 @@ const PostMessageW = user32.func('bool __stdcall PostMessageW(HWND h, uint32_t m
 
 const LABEL = 'doctray check xkTODO.md';
 const TITLE = LABEL + ' — gmist';
+const OTHER_LABEL = 'doctray other.md';
+// A file that does not exist: gmist answers 404 and opens nothing, and the URL still names a document.
+const URL_ = 'http://localhost:5173/open?path=' + encodeURIComponent('C:\\tagfox-doctray-check\\' + LABEL);
+const OTHER_URL = 'http://localhost:5173/open?path=' + encodeURIComponent('C:\\tagfox-doctray-check\\' + OTHER_LABEL);
 
 (async () => {
   const failures = [];
@@ -53,7 +57,7 @@ const TITLE = LABEL + ' — gmist';
     check(t.hidden && !t.pills.length, `no doc windows: the tray is hidden (${JSON.stringify(t.pills)})`);
 
     const opened = await drv.ev(
-      `window.tagBrowser.openGmistWindow({ url: 'http://localhost:5173/doctray-check-404', label: ${JSON.stringify(LABEL)} })`
+      `window.tagBrowser.openGmistWindow({ url: ${JSON.stringify(URL_)}, label: ${JSON.stringify(LABEL)} })`
     );
     check(opened && opened.ok, `set up: a gmist doc window opens (${JSON.stringify(opened)})`);
     const hwnd = await waitFor(() => {
@@ -80,6 +84,27 @@ const TITLE = LABEL + ' — gmist';
       return v.hidden ? v : null;
     });
     check(t && t.hidden && !t.pills.length, `and the pill goes (${JSON.stringify(t && t.pills)})`);
+
+    // Opening the same file again brings back the window that has it, rather than a second window
+    // that gmist's file lock would refuse.
+    PostMessageW(hwnd, 0x0112, 0xf020, 0);
+    await waitFor(async () => (await tray()).pills.length === 1);
+    const again = await drv.ev(`window.tagBrowser.openGmistWindow({ url: ${JSON.stringify(URL_)}, label: ${JSON.stringify(LABEL)} })`);
+    check(again && again.ok && again.raised === true, `opening the parked file again raises its window (${JSON.stringify(again)})`);
+    check(await waitFor(() => IsWindowVisible(hwnd) && !IsIconic(hwnd)), 'the same window is back on screen');
+    t = await waitFor(async () => {
+      const v = await tray();
+      return v.hidden ? v : null;
+    });
+    check(t && t.hidden && !t.pills.length, `and its pill goes (${JSON.stringify(t && t.pills)})`);
+    const other = await drv.ev(`window.tagBrowser.openGmistWindow({ url: ${JSON.stringify(OTHER_URL)}, label: ${JSON.stringify(OTHER_LABEL)} })`);
+    const otherHwnd = await waitFor(() => {
+      const h = FindWindowW(null, OTHER_LABEL + ' — gmist');
+      return h && IsWindowVisible(h) ? h : null;
+    });
+    check(other && other.ok && !other.raised && !!otherHwnd, `a different file still gets a window of its own (${JSON.stringify(other)})`);
+    if (otherHwnd) PostMessageW(otherHwnd, 0x0010, 0, 0); // WM_CLOSE
+    await waitFor(() => !otherHwnd || !IsWindow(otherHwnd));
 
     PostMessageW(hwnd, 0x0112, 0xf020, 0);
     await waitFor(async () => (await tray()).pills.length === 1);
