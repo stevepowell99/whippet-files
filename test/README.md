@@ -4,7 +4,7 @@ Automated regression tests for the search, results and refresh logic in `rendere
 under the Chrome DevTools Protocol (CDP) and drive it through a hidden test hook, so they exercise the
 actual renderer rather than a reimplementation.
 
-The results area is one pane (see [Search concurrency](../README.md#search-concurrency)). The tests guard:
+The results area is one pane (see [Search concurrency](../docs/DEVELOPING.md#search-concurrency)). The tests guard:
 
 - The single canonical results DOM (`tbody`, `resultsTable`, and so on) stays present and unique.
 - Rows grown by load-more stay on screen through an auto-refresh tick.

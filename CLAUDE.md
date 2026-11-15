@@ -10,7 +10,8 @@ Role: the tool Steve reaches for a hundred times a day, so it has to work in his
 
 Do not duplicate these here; read them:
 
-- `README.md` "For developers" is canonical for run/build, project layout, how search works, the **Search concurrency** architecture note, and the history and measurements behind each rule below. Before changing an area a rule covers, read its README section.
+- `README.md` is the public, user-facing page: the pitch, install steps and the feature list. Keep internals, incidents and names out of it.
+- `docs/DEVELOPING.md` is canonical for run/build, project layout, how search works, the **Search concurrency** architecture note, and the history and measurements behind each rule below. Before changing an area a rule covers, read its section there. It is public too: give dates and measurements, and write "the development laptop" and "the user" rather than a person's or machine's name.
 - `help.md` is the source of the in-app Help. `help.html` is generated from it (`npm run build:help`, which also runs before every start), so edit `help.md`, rebuild and commit both; an edit made to `help.html` is lost at the next start.
 - `test/README.md` is canonical for the automated tests and the `#tagfoxtest` hook they drive over CDP (general technique: memory `reference_electron_cdp_testing`).
 - `TAG_VOCAB` in `tags.js` is the single source of the status (`xk`) and label (`xx`) tags. The hub `CLAUDE.md` table mirrors it, so a new tag goes into `tags.js` first. Owner (`xp`) names are a per-user setting, none by default: `tagfox-tag-owners.json` in userData, written by Settings → Owner tags and read by main and the window at startup (`setOwnerTags`). Steve's are in the hub table.
@@ -20,19 +21,19 @@ Do not duplicate these here; read them:
 - **A background job here runs directly in `C:\dev\TagFox`, not an isolated worktree** (`.claude/settings.json` sets `worktree.bgIsolation: none`). A fresh worktree carries no `node_modules`, so a job confined to one could never run `npm test` or `npm run dist`, and the work has to land in this checkout, where Steve runs the app. General rule: memory `reference_working_in_parallel`.
   - A worktree made by hand sits beside the repo, never inside a dot-folder such as `.claude\worktrees\`: Whippet hides dot-folders by default, so the tests' seed files never reach the list and about half the suite fails (9 November 2026; the same suite passed 47/47 from `C:\dev\TagFox-e43`). It needs its own `npm install`, is cut from `main` and lands on `main` by fast-forward. A docs-only or task-file commit does not need a full suite.
 - **Steve runs TagFox with `npm start`, always, and never installs the packaged app.** `npm run dist` exists only to hand someone else a build (`scripts/run-dist.js` copies the installer to the hello@ Drive's `Causal Map\TagFox download\`): build it when asked to ship, and never install or update an exe on Steve's machine. When diagnosing his running app, it is the working tree.
-- **Autostart is the per-machine scheduled task `TagFoxAutostart`** (`scripts/autostart.ps1`: the Everything user instance, then `npm start`). Install or remove it with `pwsh scripts/install-autostart.ps1 [-Uninstall]`; git does not carry it, so a fresh machine needs `machine-parity.ps1 -Fix`. It logs to `%LOCALAPPDATA%\TagFox\autostart.log`, including a line per Electron exit; there is no crash reporter. README "Autostart, restart and the dev reloader".
+- **Autostart is the per-machine scheduled task `TagFoxAutostart`** (`scripts/autostart.ps1`: the Everything user instance, then `npm start`). Install or remove it with `pwsh scripts/install-autostart.ps1 [-Uninstall]`; git does not carry it, so a fresh machine needs `machine-parity.ps1 -Fix`. It logs to `%LOCALAPPDATA%\TagFox\autostart.log`, including a line per Electron exit; there is no crash reporter. `docs/DEVELOPING.md` "Autostart, restart and the dev reloader".
 - **An edit to `main.js` never restarts TagFox; a Restart button shows in the search box instead.** Every restart goes through `restartTagFoxProcess()`, which exits 75 under the `scripts/start.js` wrapper so TagFox stays in the same terminal, and falls back to `app.relaunch` outside it. Main counts itself under the wrapper only when its parent process is the wrapper (`START_WRAPPER_EXIT_CODE`). Guarded by `test/restart-in-terminal.cjs`.
 - **The dev reloader never reloads the window over stale main-process or preload code** (`startDevReloader`): a renderer edit reloads Whippet's own pages only while main and the preloads are as they started, and otherwise waits for Restart. A reload onto renderer code that needed a newer main froze Steve's window for 100 minutes (9 November 2026). It polls only the root files of `build.files`. Guarded by `test/dev-reloader.cjs`.
   - **In a change that touches main-process or preload code and the renderer, save the main-side edit first.** Once main is stale nothing reloads; a renderer edit saved first still reloads the window over the old main, which is the freeze again. A larger change of that kind goes in a worktree beside the repo and lands by one fast-forward, whose files reach the disk together.
 
 ## Speed
 
-- **The renderer must never be left at Chromium's background priority** (`disable-renderer-backgrounding`, `backgroundThrottling: false`), and main raises its own process to Normal at startup; the autostart task registers at priority 4. **Assert it rather than trust the switch name:** with the window hidden or covered, `Get-Process` must show `PriorityClass=Normal` for the `--type=renderer` processes. README "Speed: priority and the perf log".
+- **The renderer must never be left at Chromium's background priority** (`disable-renderer-backgrounding`, `backgroundThrottling: false`), and main raises its own process to Normal at startup; the autostart task registers at priority 4. **Assert it rather than trust the switch name:** with the window hidden or covered, `Get-Process` must show `PriorityClass=Normal` for the `--type=renderer` processes. `docs/DEVELOPING.md` "Speed: priority and the perf log".
 - **`%TEMP%\tagfox-mainperf.log` is the one perf log, and both processes write to it.** Thresholds are set so an ordinary session writes nothing, so any line there is a real stall. Read it before theorising about a slow TagFox, and its `page …` lines (`watchPageHealth`) first for a blank or frozen window. A test instance writes `tagfox-mainperf-test.log` instead.
 
 ## Search and results
 
-- After changing search, results rendering or paging in `renderer.js`, run `npm test`. The results and refresh concurrency is the most fragile part of the codebase (README "Search concurrency").
+- After changing search, results rendering or paging in `renderer.js`, run `npm test`. The results and refresh concurrency is the most fragile part of the codebase (`docs/DEVELOPING.md` "Search concurrency").
 - **One results pane, and nothing renders anywhere else.** One search state: the live controls, `lastRows` and `resultsPagingCtx`; search, F5, auto-refresh and CRUD all act on it. Do not reintroduce background rendering of a second pane.
 - **Auto-refresh defaults to 5 seconds, and a tick repaints only on a real change** (`resultsTableRenderSignature()`) and writes nothing to the status line. `autoRefreshTickWouldDisturb()` skips a tick while the pointer is in the list, a drag is live, or the list has grown past its first page; that last test is `singleOffset > pageSize`, never `> 0`. F5 and Refresh always repaint and report. Guarded by `test/quiet-refresh.cjs`, whose positive control (a new file still gets through) is the half that matters.
 - **An explicit refresh must prove it ran:** every route goes through `refreshResultsFromUi()` and reports `Refreshed hh:mm:ss — N row(s), unchanged` (or `+3 new, -1 gone`). Do not reduce that status to a bare row count. Refresh is a click in the options panel and the `/` list as well as F5; Runner does not carry a refresh button of its own (Steve, 25 October 2026). Guarded by `test/refresh-visible.cjs`.
@@ -41,14 +42,14 @@ Do not duplicate these here; read them:
 ## Runner, keys and the window
 
 - **Runner is the only layout (Steve, 24 October 2026); Classic's code is gone and nothing offers a layout switch.** **The base CSS rules under Runner's block stay where Runner overrides them (Steve, 26 October 2026):** proving one dead means reaching every state it applies in and comparing every element's box and computed style.
-- **Runner is a layout of this renderer, never a fork.** A Runner-only copy of the search, the table, the Viewer or the favourites store is a defect. Every ranking weight is in `RUNNER_RANK`, applied only through `runnerRankWeights()`. README "Runner layout"; `test/runner-layout.cjs`.
+- **Runner is a layout of this renderer, never a fork.** A Runner-only copy of the search, the table, the Viewer or the favourites store is a defect. Every ranking weight is in `RUNNER_RANK`, applied only through `runnerRankWeights()`. `docs/DEVELOPING.md` "Runner layout"; `test/runner-layout.cjs`.
 - **Keys follow the analogues people already know, and an action takes as many keys as the analogues suggest (Steve, 26 October 2026).** Where Everything, Explorer, a browser or an ordinary Windows app each suggest a key for the same action, TagFox answers to all of them, Everything's and Explorer's always among them; otherwise the ordinary Windows meaning holds. One key must never mean two things in the same place. Every key is a `RUNNER_KEYS` entry with a `does`, the table Help's Keys tab is drawn from: a key handled anywhere else is missing from Help and breaks unnoticed. A key that stands for a `/` command names it with `cmd`.
 - **Taking anything off the Shelf recycles it, never deletes it** (`clear-shelf` and `remove-shelf-paths` call `recycleListBatched`). A drop onto the Shelf moves the original, so a Shelf item is often the only copy. Its × asks nothing; do not bring back a permanent delete there, for speed or for files Node cannot remove. `test/runner-shelf.cjs`.
 - **Toggling TagFox in raises no overlay.** Do not reintroduce an on-show overlay.
 - **The window's × hides TagFox and never quits it** unless `appQuitting` is set (File → Quit TagFox, the `/` command, Windows' `query-session-end`). Guarded by `test/close-hides.cjs`, which posts a real `WM_CLOSE`.
 - **Ctrl+Shift+Space is a fixed third global shortcut** (`RECENT_CHANGES_ACCEL`, not in Settings): TagFox on the last hour's changes anywhere (`openRecentChanges()`).
 - **Every global-shortcut raise parks the doc windows first** (`minimiseWebEditorWindows`), since an owned window always sits above the main window.
-- **The toggle shortcut pressed from another app's Open or Save dialog sends the next pick to that dialog** (`file-dialog-handoff.js`, `fileDialogTarget`; README "Sending a pick to a file dialog"). Four rules are load-bearing:
+- **The toggle shortcut pressed from another app's Open or Save dialog sends the next pick to that dialog** (`file-dialog-handoff.js`, `fileDialogTarget`; `docs/DEVELOPING.md` "Sending a pick to a file dialog"). Four rules are load-bearing:
   - Text goes only to the file-name box of the same dialog (same handle and process, found again at the moment of sending, and inside that dialog), by `WM_SETTEXT`, and is read back before anything is pressed.
   - The dialog's button is pressed (`WM_COMMAND` `IDOK`) only when it reads Open.
   - A Save dialog, or one whose button says anything else, is only filled in, with the folder plus the name already in its box, and never pressed, because Save over an existing file brings up an overwrite prompt.
@@ -58,7 +59,7 @@ Do not duplicate these here; read them:
 
 ## Viewer
 
-- **The Viewer's markdown write is armed by the editor, never by the preview, and refuses a file that has moved on disk.** `flushMdFileAutosave` returns unless `mdFileEditorIsOpen()`; `openMdFileEditorFresh` re-reads the file before the editor opens; the write is refused, with a status line, when the bytes on disk differ from `mdAutosaveLoadedText`. Do not arm the write anywhere else, and do not treat the refusal as an edge case: an agent co-editing the file is the common case here, and the old behaviour reverted Steve's work for eight weeks (README "Viewer internals"). Guarded by `test/md-preview-no-write.cjs`, whose positive control (an edit must still save) is the half that matters.
+- **The Viewer's markdown write is armed by the editor, never by the preview, and refuses a file that has moved on disk.** `flushMdFileAutosave` returns unless `mdFileEditorIsOpen()`; `openMdFileEditorFresh` re-reads the file before the editor opens; the write is refused, with a status line, when the bytes on disk differ from `mdAutosaveLoadedText`. Do not arm the write anywhere else, and do not treat the refusal as an edge case: an agent co-editing the file is the common case here, and the old behaviour reverted Steve's work for eight weeks (`docs/DEVELOPING.md` "Viewer internals"). Guarded by `test/md-preview-no-write.cjs`, whose positive control (an edit must still save) is the half that matters.
 - **The Viewer's header is the only header.** A mode block inside `#propsDetails` does not carry a title or button row of its own; its actions live in the header. Loading, errors and kinds TagFox cannot preview go through `showPropsPlaceholder`. `test/viewer-runner.cjs`.
 - **The folder doc is two-state** (`syncFolderDocHeaderExists`, `syncFolderDocChrome`): a found doc, or the empty state with one name field. Do not show create or rename chrome while a found doc is displayed. A folder doc writes only on Save; a text file saves as you type.
 - **Every way of making a TODO uses the one Quick TODO box** (`showQuickTodoPop(folder)`) and one set of tags (`newTodoMdTags`).
@@ -68,14 +69,14 @@ Do not duplicate these here; read them:
 
 ## Google Drive
 
-- **Without `google-oauth-client.json` at the app root, every Drive-backed action reports a sign-in problem and opens nothing.** The file is gitignored; README "Google Drive setup" names the copy to use, and `machine-parity.ps1` checks for it.
+- **Without `google-oauth-client.json` at the app root, every Drive-backed action reports a sign-in problem and opens nothing.** The file is gitignored; `docs/DEVELOPING.md` "Google Drive setup" names the copy to use, and `machine-parity.ps1` checks for it.
 - **Resolve a row's Drive file id with `resolveGoogleDriveFileIdRobust` (`main.js`), not the stream-only `resolveGoogleDriveFileIdForPath`.**
   - **The `:user.drive.id` read is synchronous and escalates to cmd and then PowerShell, so it must never run per file over a folder.** The sibling scan reads every sibling with `{ cheapOnly: true }` and escalates on at most `ADS_ESCALATION_BUDGET`. Keep the cheap pass over the whole folder: the bound belongs on how hard each file is tried, not on how many files are looked at.
 - **Drive and vault membership are each decided once, in the renderer** (`pathUnderGoogleDrive`, `pathInObsidianVault`), and passed to the row context menu as `underGoogleDrive` and `inObsidianVault`, so a button and its menu entry are one decision. Do not add a second test of either in `main.js`.
 
 ## Open in gmist, Google Workspace and the browser
 
-README "Open in gmist and Google Workspace" describes the row's pen buttons and the mechanisms below.
+`docs/DEVELOPING.md` "Open in gmist and Google Workspace" describes the row's pen buttons and the mechanisms below.
 
 - **Every open path goes through `openFileDefaultOrGoogleWorkspace`**, which routes `.md`/`.qmd` to local gmist, starting it if it is down; the context menu's **Open with default app** is the way to Obsidian. The local pen and the online cloud are separate actions (`openRowInLocalGmist`, `openRowInOnlineGmist`), not a fallback chain, and gmist owns both `/open` contracts. TagFox holds no gmist credentials and never touches the localfs sidecar or its token.
 - **A button that cannot work on this machine is not shown** (`machine-features`: gmist, makePdf, googleSignIn). `localGmistSource()` is the one place that decides whether this machine has a gmist. **Key the gmist test on there being no gmist anywhere, never on gmist not running.** `test/machine-features.cjs`.
@@ -93,9 +94,9 @@ README "Open in gmist and Google Workspace" describes the row's pen buttons and 
 
 ## Print markdown to PDF
 
-- **The PDF is JobCat's `make_pdf.py`, run as a subprocess, so TagFox holds no PDF styling:** change the house PDF in JobCat. Three profiles are chosen per click. README "Print markdown to PDF".
+- **The PDF is JobCat's `make_pdf.py`, run as a subprocess, so TagFox holds no PDF styling:** change the house PDF in JobCat. Three profiles are chosen per click. `docs/DEVELOPING.md` "Print markdown to PDF".
 - **An existing PDF of that name is never replaced without asking**, and a run reports a PDF only when the output is on disk and non-empty, since `make_pdf.py` can print a traceback and exit 0.
 
 ## Open threads
 
-- **No general Drive sync-status badge** (mirrored Drives would read "local" for everything). Undecided: a narrow "shared (streamed)" marker for `.shortcut-targets-by-id` content; README "Decided against".
+- **No general Drive sync-status badge** (mirrored Drives would read "local" for everything). Undecided: a narrow "shared (streamed)" marker for `.shortcut-targets-by-id` content; `docs/DEVELOPING.md` "Decided against".
