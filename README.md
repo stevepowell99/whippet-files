@@ -2,7 +2,18 @@
 
 **A fast file finder for Windows.** Find any file on Windows as you type, then preview, tag and move it without leaving the keyboard.
 
-Whippet runs on top of [Voidtools Everything](https://www.voidtools.com/), which keeps an index of every file name on the computer, so a search across millions of files answers while you are still typing. Around that search it does most of what File Explorer gets used for. It keeps tags and tasks in plain file names and markdown, which people, sync services and AI assistants can all read.
+Whippet runs on top of [Voidtools Everything](https://www.voidtools.com/), which keeps an index of every file name on the computer, so a search across millions of files answers while you are still typing.
+
+It looks like a launcher-style search, in the manner of Spotlight on a Mac: one box and a list of results. In daily use it largely takes the place of a file browser as well, because the list of results is somewhere you can work:
+
+- **Select several rows at once** and copy, move or bulk rename them together.
+- **Preview each file** in the Viewer as you move down the list, without opening it.
+- **Move through the folder tree from the list:** `→` goes into a folder, `←` back up, and `Alt`+`←` returns to the search before.
+- **Star the files and folders you return to** with `Ctrl`+`D`.
+- **The order follows what you are likely to want:** name matches first, then files changed recently, starred and often used, so the file you have in mind is usually near the top.
+- **Tags and tasks live in file names**, so `/todo` or the overdue filter lists every matching file across all your drives at once.
+
+Tags and tasks are plain file names and markdown, which people, sync services and AI assistants can all read.
 
 ![Whippet: typing a search, the Viewer following each row, tagging a file with Ctrl+T, and /todo listing the files tagged TODO](docs/img/whippet-demo.gif)
 
