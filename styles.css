@@ -1911,6 +1911,14 @@ body.tagfox-runner #queryInputGroup .tagfox-query-clear.btn {
 .tagfox-runner-opts-btn[aria-expanded="true"] {
   opacity: 1;
 }
+/* Back and forward sit as a pair, closer together; at an end of the history the arrow all but goes. */
+.tagfox-runner-opts-btn.tagfox-runner-nav-btn {
+  padding: 0 0.4rem;
+}
+.tagfox-runner-opts-btn.tagfox-runner-nav-btn:disabled {
+  border: 0;
+  opacity: 0.1;
+}
 /* Something differs from the defaults: the options control stops being faint. */
 .tagfox-runner-opts-btn.tagfox-runner-opts-btn--changed {
   opacity: 1;

@@ -502,6 +502,13 @@
           <span id="runnerRankNote" class="tagfox-runner-rank-note d-none"></span>
           <!-- Runner only: the Viewer toggle, and the options, one low-contrast control that opens on click. -->
           <div class="position-relative d-flex align-self-stretch">
+            <!-- Back and forward through earlier searches (Alt+Left, Alt+Right); each is disabled at its end of the history. -->
+            <button type="button" id="btnSearchBack" class="btn tagfox-runner-opts-btn tagfox-runner-nav-btn" title="Back to the search before (Alt+←)" aria-label="Back" disabled>
+              <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" id="btnSearchForward" class="btn tagfox-runner-opts-btn tagfox-runner-nav-btn" title="Forward to the search after (Alt+→)" aria-label="Forward" disabled>
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
             <!-- The Viewer on or off (Alt+P); not faint while the Viewer is hidden, so the way back shows. -->
             <button type="button" id="btnRunnerViewer" class="btn tagfox-runner-opts-btn" aria-pressed="true" aria-controls="propsAside" title="Hide the Viewer (Alt+P)" aria-label="Viewer">
               <i class="fa-solid fa-table-columns" aria-hidden="true"></i>

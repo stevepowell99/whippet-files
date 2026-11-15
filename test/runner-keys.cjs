@@ -11,6 +11,7 @@
 //   - Tab and Shift+Tab move between the box and the list, as in Everything, and Space in the list toggles
 //     the row's check; Right and Left still go into a folder and back;
 //   - Alt+P, the Viewer button and the options panel's The Viewer hide and show the Viewer; ? in an empty box opens Help at Runner's keys, drawn from the table;
+//   - the back and forward arrows in the box go through earlier searches as Alt+Left and Alt+Right do, each live only where there is somewhere to go;
 //   - Alt+Home clears the text, the folder and every filter; Ctrl+Shift+Home clears the folder and every filter but keeps the text;
 //   - Ctrl+M sorts by date and again back to smart;
 //   - F1 and the / command Help open Help on Get started, ? on the Keys tab, the Settings link on Setting up;
@@ -280,6 +281,34 @@ async function main() {
     await drv.ev(`document.querySelector('#runnerOptsPanel [data-cmd-id="viewer"]').click()`);
     check(await viewerShown(), 'clicking The Viewer in the options panel shows it again');
     await drv.ev(`document.getElementById('btnRunnerOpts').click()`);
+
+    // Back and forward: Alt+Left and Alt+Right, and the two arrows in the box, which are live only where there is somewhere to go.
+    const nav = () => drv.ev(`(() => { const b = document.getElementById('btnSearchBack'), f = document.getElementById('btnSearchForward'); return { back: !b.disabled, fwd: !f.disabled, visible: b.getBoundingClientRect().width > 0 && f.getBoundingClientRect().width > 0, before: b.getBoundingClientRect().right <= document.getElementById('btnRunnerViewer').getBoundingClientRect().left + 1 }; })()`);
+    await go(alpha);
+    await drv.T('commitHistory');
+    await go(many);
+    await drv.T('commitHistory');
+    let n = await nav();
+    check(n.visible && n.before && n.back && !n.fwd, `the back and forward arrows sit in the box before the Viewer button; at the newest search only back is live (${JSON.stringify(n)})`);
+    await focusBox();
+    await click('#btnSearchBack');
+    await drv.settle('back button');
+    s = await R();
+    n = await nav();
+    const boxKeptFocus = await drv.ev(`document.activeElement === document.getElementById('query')`);
+    check(norm(s.scope) === norm(alpha) && n.fwd && boxKeptFocus, `clicking back returns to the search before, forward comes alive and the box keeps the focus (${path.basename(s.scope)}, ${JSON.stringify(n)})`);
+    await click('#btnSearchForward');
+    await drv.settle('forward button');
+    s = await R();
+    n = await nav();
+    check(norm(s.scope) === norm(many) && n.back && !n.fwd, `clicking forward goes on again, and forward is spent (${path.basename(s.scope)}, ${JSON.stringify(n)})`);
+    await key('ArrowLeft', 'ArrowLeft', 37, 1);
+    await drv.settle('alt left');
+    s = await R();
+    n = await nav();
+    check(norm(s.scope) === norm(alpha) && n.fwd, `Alt+Left does the same as the back arrow, and the arrows follow it (${path.basename(s.scope)}, ${JSON.stringify(n)})`);
+    await key('ArrowRight', 'ArrowRight', 39, 1);
+    await drv.settle('alt right');
 
     // Alt+O: the options panel, worked from the keyboard.
     const opts = () => drv.ev(`(() => { const p = document.getElementById('runnerOptsPanel'); const a = p && p.querySelector('.tagfox-runner-cmd--active'); return { open: !!p && !p.hidden, active: a ? a.dataset.cmdId : null, activeOn: !!(a && a.querySelector('.fa-check')) }; })()`);

@@ -4905,6 +4905,12 @@
         setRunnerOptsPanelOpen(!runnerOptsPanelOpen);
       });
       document.getElementById('btnRunnerViewer')?.addEventListener('click', () => runnerToggleViewer());
+      for (const [id, delta] of [['btnSearchBack', -1], ['btnSearchForward', 1]]) {
+        const b = document.getElementById(id);
+        /* The focus stays where it was (normally the box), so typing carries on after a click. */
+        b?.addEventListener('mousedown', (e) => e.preventDefault());
+        b?.addEventListener('click', () => void goSearchHistory(delta));
+      }
       document.getElementById('runnerOptsPanel')?.addEventListener('click', (e) => {
         const b = e.target.closest('.tagfox-runner-cmd');
         if (!b) return;
@@ -11889,6 +11895,15 @@
         searchHistIdx = Math.max(0, searchHistIdx - drop);
       }
       searchHistIdx = searchHist.length - 1;
+      syncSearchHistoryButtons();
+    }
+
+    /** The box's back and forward buttons are live only where Alt+Left and Alt+Right have somewhere to go. */
+    function syncSearchHistoryButtons() {
+      const back = document.getElementById('btnSearchBack');
+      const fwd = document.getElementById('btnSearchForward');
+      if (back) back.disabled = searchHistIdx <= 0;
+      if (fwd) fwd.disabled = searchHistIdx >= searchHist.length - 1;
     }
 
     function applySearchState(s) {
@@ -11932,6 +11947,7 @@
       searchHistNavigating = true;
       try {
         searchHistIdx = next;
+        syncSearchHistoryButtons();
         const entry = searchHist[searchHistIdx];
         applySearchState(entry);
         persistActiveTagFilter();
@@ -11946,6 +11962,7 @@
     function seedSearchHistoryFromCurrent() {
       searchHist = [serializeSearchState()];
       searchHistIdx = 0;
+      syncSearchHistoryButtons();
     }
 
     /** Folder glyph in Name column (Font Awesome). */
