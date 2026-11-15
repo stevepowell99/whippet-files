@@ -2,37 +2,39 @@
 
 **A fast file finder for Windows.** Find any file on Windows as you type, then preview, tag and move it without leaving the keyboard.
 
-Whippet runs on top of [Voidtools Everything](https://www.voidtools.com/), which keeps an index of every file name on the computer, so a search across millions of files answers while you are still typing.
-
-It looks like a launcher-style search, in the manner of Spotlight on a Mac: one box and a list of results. In daily use it largely takes the place of a file browser as well, because the list of results is somewhere you can work:
-
-- **Select several rows at once** and copy, move or bulk rename them together.
-- **Preview each file** in the Viewer as you move down the list, without opening it.
-- **Move through the folder tree from the list:** `→` goes into a folder, `←` back up, and `Alt`+`←` returns to the search before.
-- **Star the files and folders you return to** with `Ctrl`+`D`.
-- **The order follows what you are likely to want:** name matches first, then files changed recently, starred and often used, so the file you have in mind is usually near the top.
-- **Tags and tasks live in file names**, so `/todo` or the overdue filter lists every matching file across all your drives at once.
-
-Tags and tasks are plain file names and markdown, which people, sync services and AI assistants can all read.
+Whippet runs on top of [Voidtools Everything](https://www.voidtools.com/), which keeps an index of every file name on the computer, so a search across millions of files answers while you are still typing. At first sight it is Everything with a preview beside the list. In use, you will find you rarely need a file browser either.
 
 ![Whippet: typing a search, the Viewer following each row, tagging a file with Ctrl+T, and /todo listing the files tagged TODO](docs/img/whippet-demo.gif)
 
-## What it does
+## Why you might want it
 
-- **Finds anything as you type**, on every drive Everything indexes.
+- **Any file, as you type.** The order follows what you are likely to want, so the file you have in mind is usually near the top.
+- **A preview beside the list.** Documents, images, PDFs and media show as you move down the rows, without opening anything.
+- **Each folder's own notes.** A folder's `README.md`, `CLAUDE.md` or similar shows beside its files, and you can edit it there.
+- **A file browser in the same list.** Go into a folder with `→` and back up with `←`, select several rows, then copy, move, rename or delete them.
+- **Stars** for the files and folders you return to.
+- **Tags and tasks in the file name.** One command lists every TODO, or every overdue task, on every drive at once.
+- **Keyboard first, mouse welcome.** Everything can be done from the keyboard, and the same actions are on buttons, the right-click menu and the `/` command list.
+
+## In more detail
+
+- **Search** covers every drive Everything indexes.
   - Name matches come first, then files changed recently, starred and often used, with a boost for Windows' own Recent list.
   - `Ctrl`+`Alt`+`Space` brings Whippet up from any program with the search ready; `Ctrl`+`Shift`+`Space` shows everything changed in the last hour.
   - Narrow by folder, by file type (`.md`), by date (`Ctrl`+`R` steps from the last hour to the last year), by tag or by deadline; `-word` leaves a word out.
-  - Save a search and run it again with `Alt`+`1` to `9`.
-- **Shows a file without opening it.** Images, PDFs, Word, Excel, PowerPoint, markdown, text, audio and video preview in a side panel. Markdown and text files can be edited there, and each folder can show and edit its own readme.
-- **Manages files.** Copy, cut and paste, to and from File Explorer and screenshots included; drag and drop; rename; bulk rename with wildcards; new folders; delete to the Recycle Bin, or for good with `Shift`+`Del`. The keys are the ones Explorer and Everything already use.
+  - Save a search and run it again with `Alt`+`1` to `9`; `Alt`+`←` and `Alt`+`→` go back and forward through earlier searches.
+- **The Viewer** previews images, PDFs, Word, Excel, PowerPoint, markdown, text, audio and video in a side panel.
+  - Markdown and text files can be edited there.
+  - With a folder selected it shows and edits the folder's doc: a file in the folder named `-readme.md`, `readme.md`, `claude.md`, `agents.md` or one of a few similar names. **Settings**, under **Viewer docs**, changes the names.
+- **File management** uses the keys Explorer and Everything already use: copy, cut and paste, to and from File Explorer and screenshots included; drag and drop; rename; bulk rename with wildcards; new folders; delete to the Recycle Bin, or for good with `Shift`+`Del`.
+  - `Ctrl`+`D` stars a file or folder.
   - The Shelf gathers files from several folders while you find the one they belong in.
   - With another program's Open or Save dialog in front, the hotkey raises Whippet, and the file you pick goes into that dialog.
-- **Tags and tracks work in the file name.** `Report xkTODO.docx` is tagged TODO, and typing `/todo` lists everything tagged TODO. The tags travel with the file into Explorer, Google Drive, zip files and git, without a database.
+- **Tags** are part of the file name: `Report xkTODO.docx` is tagged TODO, and typing `/todo` lists everything tagged TODO. The tags travel with the file into Explorer, Google Drive, zip files and git, without a database.
   - Tasks carry a status, an owner, a deadline (`xd-2026-07-15`) and a hide-until date (`xh-2026-09-01`), with filters for overdue, due today and due this week.
   - `Alt`+`Shift`+`N`, from any program, writes a TODO note as a markdown file.
-- **Works with markdown and AI assistants.** `Ctrl`+`O` opens a markdown file in Obsidian when one of your vaults holds it. Because tags and tasks are plain names and markdown, an AI assistant working in the same folders can read and change them as easily as you can.
-- **Runs from the keyboard.** `/` lists every command, `?` every key, and `F1` opens the guide.
+- **Markdown and AI assistants.** `Ctrl`+`O` opens a markdown file in Obsidian when one of your vaults holds it. Because tags and tasks are plain names and markdown, people, sync services and an AI assistant working in the same folders can all read and change them.
+- **Keys and commands.** `/` lists every command, `?` every key, and `F1` opens the guide.
 
 ## For everyday users
 
