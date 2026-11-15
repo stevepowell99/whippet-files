@@ -69,7 +69,7 @@ Do not duplicate these here; read them:
 
 ## Google Drive
 
-- **Without `google-oauth-client.json` at the app root, every Drive-backed action reports a sign-in problem and opens nothing.** The file is gitignored; The hub's `machine-parity.ps1` checks for it and names the copy to use.
+- **Without `google-oauth-client.json` at the app root, every Drive-backed action reports a sign-in problem and opens nothing.** The file is gitignored; the hub's `machine-parity.ps1` checks for it and names the copy to use.
 - **Resolve a row's Drive file id with `resolveGoogleDriveFileIdRobust` (`main.js`), not the stream-only `resolveGoogleDriveFileIdForPath`.**
   - **The `:user.drive.id` read is synchronous and escalates to cmd and then PowerShell, so it must never run per file over a folder.** The sibling scan reads every sibling with `{ cheapOnly: true }` and escalates on at most `ADS_ESCALATION_BUDGET`. Keep the cheap pass over the whole folder: the bound belongs on how hard each file is tried, not on how many files are looked at.
 - **Drive and vault membership are each decided once, in the renderer** (`pathUnderGoogleDrive`, `pathInObsidianVault`), and passed to the row context menu as `underGoogleDrive` and `inObsidianVault`, so a button and its menu entry are one decision. Do not add a second test of either in `main.js`.

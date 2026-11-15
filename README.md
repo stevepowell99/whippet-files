@@ -33,7 +33,7 @@ Whippet runs on top of [Voidtools Everything](https://www.voidtools.com/), which
 
 Open Whippet. If it cannot search through Everything, a setup card takes the place of the list. It works out which step you are on (Everything not installed, not running, only version 1.4, no HTTP Server plugin, or the HTTP server switched off), shows that one step with a button, and checks again by itself until Everything answers, when the card goes. When the HTTP server is on at a port other than the one in **Settings**, under **Connection to Everything Search**, Whippet sets that address to the port Everything's settings name. The card only reads Everything's settings and never changes them.
 
-Some buttons appear only on a machine set up for them: opening markdown in the [gmist](https://mist.broad-smoke-cc64.workers.dev) editor needs a gmist checkout beside Whippet, **Print to PDF** needs a JobCat checkout with its `make_pdf.py`, and Google Drive sign-in needs a Google OAuth client file (see "Google Drive setup" in [`docs/DEVELOPING.md`](docs/DEVELOPING.md)). Without them, those buttons are not shown.
+Some buttons depend on other tools of mine or on a Google setup of your own, and appear only on a machine that has them: opening markdown in the [gmist](https://mist.broad-smoke-cc64.workers.dev) editor needs a gmist checkout beside Whippet, **Print to PDF** needs a JobCat checkout with its `make_pdf.py`, and Google Drive sign-in needs a Google OAuth client file (see "Google Drive setup" in [`docs/DEVELOPING.md`](docs/DEVELOPING.md)). Without them, those buttons are not shown.
 
 Owner tags (`xp` plus a name, such as `xpSAM`) are the names you set in **Settings**, under **Owner tags**. There are none until you add some.
 

@@ -10,8 +10,10 @@ const { spawnSync } = require('child_process');
 const root = path.join(__dirname, '..');
 // e.g. C:\Users\<you>\AppData\Local\TagFox-dist — not OneDrive, not in workspace watchers
 const outDir = path.join(os.homedir(), 'AppData', 'Local', 'TagFox-dist');
-// The download folder friends are given a link to, so it holds the current installer and nothing else.
-const copyDir = path.join(os.homedir(), 'My Drive (hello@causalmap.app)', 'Causal Map', 'TagFox download');
+// The maintainer's download folder, which people are given a link to, so it holds the current installer and
+// nothing else. On a machine without that Drive the copy is skipped and the installer stays in outDir.
+const copyParent = path.join(os.homedir(), 'My Drive (hello@causalmap.app)', 'Causal Map');
+const copyDir = path.join(copyParent, 'TagFox download');
 const eb = path.join(root, 'node_modules', '.bin', 'electron-builder.cmd');
 
 console.log('electron-builder output directory:', outDir);
@@ -25,6 +27,11 @@ if (r.status !== 0) process.exit(r.status == null ? 1 : r.status);
 
 // Copy the built installer exe to the download folder and remove older installers from it; each one is still
 // in outDir.
+if (!fs.existsSync(copyParent)) {
+  console.log('Installer is in:', outDir);
+  console.log('Not copied to a download folder: this machine does not have', copyParent);
+  process.exit(0);
+}
 try {
   const exeNames = fs
     .readdirSync(outDir, { withFileTypes: true })
