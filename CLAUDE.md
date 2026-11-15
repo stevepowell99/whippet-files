@@ -11,6 +11,7 @@ Role: the tool Steve reaches for a hundred times a day, so it has to work in his
 Do not duplicate these here; read them:
 
 - `README.md` "For developers" is canonical for run/build, project layout, how search works, the **Search concurrency** architecture note, and the history and measurements behind each rule below. Before changing an area a rule covers, read its README section.
+- `help.md` is the source of the in-app Help. `help.html` is generated from it (`npm run build:help`, which also runs before every start), so edit `help.md`, rebuild and commit both; an edit made to `help.html` is lost at the next start.
 - `test/README.md` is canonical for the automated tests and the `#tagfoxtest` hook they drive over CDP (general technique: memory `reference_electron_cdp_testing`).
 - `TAG_VOCAB` in `tags.js` is the single source of the status (`xk`) and label (`xx`) tags. The hub `CLAUDE.md` table mirrors it, so a new tag goes into `tags.js` first. Owner (`xp`) names are a per-user setting, none by default: `tagfox-tag-owners.json` in userData, written by Settings → Owner tags and read by main and the window at startup (`setOwnerTags`). Steve's are in the hub table.
 
