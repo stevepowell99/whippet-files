@@ -38,6 +38,8 @@
 
 Whippet finds files and folders on your computer as you type, and lets you open, preview, move, rename and tag them without going through File Explorer.
 
+It looks like a launcher-style search, one box and a list of results, but the list is somewhere you can work, which is why it largely takes the place of a file browser. You can select several rows and act on them together, preview each file as you move down the list, go into a folder with `→` and back up with `←`, star what you return to with `Ctrl`+`D`, and list every TODO or overdue file across all your drives with one command.
+
 - **Finds anything as you type**, on every drive, with name matches first and then what you changed recently, starred or use often. Narrow by folder, type, date, tag or deadline (see **Finding things**).
 - **Shows a file without opening it**: images, PDFs, Office files, markdown, text, audio and video, with markdown and text editable in place (see **The Viewer**).
 - **Manages files**: copy, cut, paste, drag, rename, bulk rename, new folders and delete, with the keys File Explorer uses, plus the Shelf for gathering files from several folders (see **Working with files**).
@@ -69,7 +71,7 @@ Whippet does not search the disk itself. It asks [Everything](https://www.voidto
 - The **Viewer**, on the right, previews whatever is selected (see **The Viewer**).
 - The **Shelf**, under the list, holds files while you find the folder they belong in (see **Working with files**).
 - Each time you bring Whippet up, and every few minutes while it is up, a line at the bottom of the list shows a tip for ten seconds. A message, such as what an action did or why it failed, takes its place for a few seconds; point at it to keep it there.
-- Two faint buttons sit at the right of the search box. The first hides and shows the Viewer. The second, **Options**, lists the sort orders, filters and tags as buttons.
+- Faint buttons sit at the right of the search box: two arrows that go back and forward through your earlier searches, a button that hides and shows the Viewer, and **Options**, which lists the sort orders, filters and tags as buttons.
 
 ### Help and keys
 
@@ -94,7 +96,7 @@ Whippet does not search the disk itself. It asks [Everything](https://www.voidto
 - `Shift`+`Enter` goes to the folder holding the selected row.
 - Paste a folder's path into the search box to go straight there, or a file's path to go to its folder with the file selected. A typed path goes there when you press `Enter`.
 - Point at the folder's name at the start of the search box for its buttons: show it in File Explorer, copy it, edit its tags, open a terminal there, copy its full path in quotes, and the full menu.
-- `Alt`+`←` and `Alt`+`→` go back and forward through your earlier searches, as in a browser. `Alt`+`Home` starts again, with no text, no folder and every filter at its default. `Ctrl`+`Shift`+`Home` does the same but keeps the text, so the same words are searched everywhere.
+- `Alt`+`←` and `Alt`+`→` go back and forward through your earlier searches, as in a browser; the two arrows at the right of the search box do the same. `Alt`+`Home` starts again, with no text, no folder and every filter at its default. `Ctrl`+`Shift`+`Home` does the same but keeps the text, so the same words are searched everywhere.
 
 ### Commands and options
 
