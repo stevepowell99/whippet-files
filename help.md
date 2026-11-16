@@ -38,7 +38,7 @@
 
 Whippet finds files and folders on your computer as you type, and lets you open, preview, move, rename and tag them without going through File Explorer.
 
-It looks like a launcher-style search, one box and a list of results, but the list is somewhere you can work, which is why it largely takes the place of a file browser. You can select several rows and act on them together, preview each file as you move down the list, go into a folder with `→` and back up with `←`, star what you return to with `Ctrl`+`D`, and list every TODO or overdue file across all your drives with one command.
+It looks like a launcher-style search, one box and a list of results, but the list is somewhere you can work, which is why it largely takes the place of a file browser. The folder you are in shows at the start of the box: with the box empty the list is that folder's contents, and what you type searches inside it. You can select several rows and act on them together, preview each file as you move down the list, go into a folder with `→` and back up with `←`, star what you return to with `Ctrl`+`D`, and list every TODO or overdue file across all your drives with one command.
 
 - **Finds anything as you type**, on every drive, with name matches first and then what you changed recently, starred or use often. Narrow by folder, type, date, tag or deadline (see **Finding things**).
 - **Shows a file without opening it**: images, PDFs, Office files, markdown, text, audio and video, with markdown and text editable in place (see **The Viewer**).

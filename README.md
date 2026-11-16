@@ -11,7 +11,7 @@ Whippet runs on top of [Voidtools Everything](https://www.voidtools.com/), which
 - **Any file, as you type.** The order follows what you are likely to want, so the file you have in mind is usually near the top.
 - **A preview beside the list.** Documents, images, PDFs and media show as you move down the rows, without opening anything.
 - **Each folder's own notes.** A folder's `README.md`, `CLAUDE.md` or similar shows beside its files, and you can edit it there.
-- **A file browser in the same list.** Go into a folder with `→` and back up with `←`, select several rows, then copy, move, rename or delete them.
+- **A file browser in the same list.** The folder you are in shows in the search box: with the box empty the list is that folder's contents, and what you type searches inside it. Go into a folder with `→` and back up with `←`, select several rows, then copy, move, rename or delete them.
 - **Stars** for the files and folders you return to.
 - **Tags and tasks in the file name.** One command lists every TODO, or every overdue task, on every drive at once.
 - **Keyboard first, mouse welcome.** Everything can be done from the keyboard, and the same actions are on buttons, the right-click menu and the `/` command list.
