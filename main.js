@@ -6940,10 +6940,21 @@ ipcMain.handle('read-file-buffer', async (_event, { fullPath, maxBytes }) => {
  */
 let thumbnailQueue = Promise.resolve();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/* A shell call can hang for good (seen after a standby, 17 November 2026), and in a serialised queue one
+   hang stops every thumbnail after it until restart. The native call cannot be cancelled; the queue moves on. */
+const THUMBNAIL_TIMEOUT_MS = 8000;
 async function thumbnailOnce(fp, px) {
-  const img = await nativeImage.createThumbnailFromPath(fp, { width: px, height: px });
-  if (!img || img.isEmpty()) return { ok: false, error: 'No thumbnail' };
-  return { ok: true, dataUrl: img.toDataURL() };
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(Object.assign(new Error('Thumbnail timed out'), { thumbTimeout: true })), THUMBNAIL_TIMEOUT_MS);
+  });
+  try {
+    const img = await Promise.race([nativeImage.createThumbnailFromPath(fp, { width: px, height: px }), timeout]);
+    if (!img || img.isEmpty()) return { ok: false, error: 'No thumbnail' };
+    return { ok: true, dataUrl: img.toDataURL() };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 function makeThumbnail(fp, px) {
   const run = thumbnailQueue.then(async () => {
@@ -6957,6 +6968,10 @@ function makeThumbnail(fp, px) {
         lastErr = r.error;
       } catch (e) {
         lastErr = String((e && e.message) || e);
+        if (e && e.thumbTimeout) {
+          mainPerfLog(`thumbnail timeout ${THUMBNAIL_TIMEOUT_MS}ms ${fp}`);
+          break; /* a hang is not the transient cache miss the retries are for */
+        }
       }
       await sleep(100);
     }
