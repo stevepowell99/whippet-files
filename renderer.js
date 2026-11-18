@@ -3287,14 +3287,6 @@
       await runnerActivateSelection('open');
     }
 
-    function runnerEnterSelectedFolder() {
-      const row = selectedFullPath ? selectedRowForActions() : null;
-      if (!row || !rowIsFolder(row)) return false;
-      const folder = normalizeFolderPathForEverything(fullPathForRow(row));
-      void runnerNavigate(() => applySearchScopeAndRefresh(folder), null);
-      return true;
-    }
-
     /** Left: the current folder's parent, or with no current folder the folder holding the selected row. */
     function runnerGoUp() {
       const scope = normalizeFolderPathForEverything(currentFolderPath.trim());
@@ -4343,10 +4335,17 @@
         setStatusMain('Shown in File Explorer: ' + selectedFullPath);
         return;
       }
-      if (how === 'folder') {
+      /* 'into' (→): a folder row opens; any other row goes to the folder holding it, as 'folder' does. */
+      const intoRow = how === 'into' ? selectedRowForActions() : null;
+      if (intoRow && rowIsFolder(intoRow)) {
+        await runnerNavigate(() => applySearchScopeAndRefresh(normalizeFolderPathForEverything(fullPathForRow(intoRow))), null);
+        return;
+      }
+      if (how === 'folder' || intoRow) {
         await runnerNavigate(() => keyboardScopeParentOfSelection(), selectedFullPath);
         return;
       }
+      if (how === 'into') return;
       if (how === 'properties') {
         const r = await window.tagBrowser.showProperties(selectedFullPath);
         if (r && !r.ok) setStatusMain('Properties: ' + (r.error || 'failed'));
@@ -4583,10 +4582,10 @@
       {
         group: 'Folders',
         keys: ['→'],
-        does: 'Into the selected folder (from the search box: with the caret at the end)',
+        does: 'Into the selected folder; on a file, to the folder holding it, with the file selected (from the search box: with the caret at the end)',
         when: (c) => c.plain && !c.shift && c.key === 'ArrowRight' && (!c.inBox || c.caretEnd),
         run: (c) => {
-          if (!c.held) runnerEnterSelectedFolder();
+          if (!c.held) void runnerActivateSelection('into');
         },
       },
       {

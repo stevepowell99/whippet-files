@@ -9,7 +9,8 @@
 //   - Ctrl held alone numbers the rows on screen and Ctrl+2 opens the second;
 //   - PageDown, Ctrl+End and Ctrl+Home move by a page, to the end and back;
 //   - Tab and Shift+Tab move between the box and the list, as in Everything, and Space in the list toggles
-//     the row's check; Right and Left still go into a folder and back;
+//     the row's check; Right and Left still go into a folder and back, and Right on a file pressed straight after
+//     typing goes to the folder holding the new search's top row, with that file selected;
 //   - Alt+P, the Viewer button and the options panel's The Viewer hide and show the Viewer; ? in an empty box opens Help at Runner's keys, drawn from the table;
 //   - the back and forward arrows in the box go through earlier searches as Alt+Left and Alt+Right do, each live only where there is somewhere to go;
 //   - Alt+Home clears the text, the folder and every filter; Ctrl+Shift+Home clears the folder and every filter but keeps the text;
@@ -39,6 +40,8 @@ async function main() {
   fs.mkdirSync(race, { recursive: true });
   for (let i = 1; i <= 40; i++) fs.mkdirSync(path.join(many, 'n' + String(i).padStart(2, '0')), { recursive: true });
   fs.writeFileSync(path.join(root, 'zeta.txt'), 'zeta\n');
+  const rightFile = path.join(alpha, 'rightfile' + tag + '.txt');
+  fs.writeFileSync(rightFile, 'right\n');
   // Same words in all three names; the AppData and ProgramData ones are the exact name, so only the penalty
   // puts them below the plain one.
   const appDir = path.join(process.env.LOCALAPPDATA || path.join(require('os').homedir(), 'AppData', 'Local'), 'TagFoxTest-' + process.pid);
@@ -258,6 +261,17 @@ async function main() {
     await drv.settle('left off the box');
     s = await R();
     check(norm(intoAgain) !== norm(many) && norm(s.scope) === norm(many), `Left with the focus off the box and the list goes up (${path.basename(intoAgain)})`);
+    // Right on a file, straight after typing (inside the search's wait): the folder holding the new top row.
+    await go(root, 'rightfile' + tag);
+    s = await waitRows((x) => x.rows.some((r) => norm(r) === norm(rightFile)), 'right file indexed');
+    check(s.rows.some((r) => norm(r) === norm(rightFile)), 'set up: the file in a subfolder is found');
+    await go(root);
+    await focusBox();
+    await drv.send('Input.insertText', { text: 'rightfile' + tag });
+    await key('ArrowRight', 'ArrowRight', 39);
+    await drv.settle('right on a file');
+    s = await R();
+    check(norm(s.scope) === norm(alpha) && norm(s.selected) === norm(rightFile) && s.query === '', `Right on a file goes to its folder with it selected (scope ${path.basename(s.scope)}, selected ${path.basename(s.selected || '')}, box "${s.query}")`);
 
     // Alt+P hides and shows the Viewer.
     const viewerShown = () => drv.ev(`getComputedStyle(document.getElementById('propsAside')).display !== 'none'`);

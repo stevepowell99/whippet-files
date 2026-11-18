@@ -89,7 +89,7 @@ Whippet does not search the disk itself. It asks [Everything](https://www.voidto
 
 ### Moving between folders
 
-- `→`, or `Enter` on a folder, goes into the selected folder. `←`, `Alt`+`↑` as in File Explorer, or `Ctrl`+`↑` as in a Mac's Finder, goes up to the parent, with the folder you left selected.
+- `→`, or `Enter` on a folder, goes into the selected folder. On a file, `→` goes to the folder holding it, with the file selected, so typing a name and pressing `→` shows where the best match lives. `←`, `Alt`+`↑` as in File Explorer, or `Ctrl`+`↑` as in a Mac's Finder, goes up to the parent, with the folder you left selected.
 - Inside a folder, with the search box empty, the folder itself is selected: its name at the start of the box lights up, and the Viewer shows the folder, with its folder doc. `↓` goes to the first row, and `↑` from the first row comes back to the folder. `Ctrl`+`Shift`+`C` copies the folder's path, and `Ctrl`+`C` copies the folder for pasting in Explorer. Once you type, the best match is selected, so `Enter` opens it.
 - `Backspace` in an empty search box leaves the folder, so you search everywhere. So does the × on the folder's name at the start of the box.
 - Click any name in the path above the search box to go there, or the › after it to choose one of the folders inside.
