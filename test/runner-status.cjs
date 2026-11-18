@@ -58,7 +58,8 @@ async function main() {
           bg: cs.backgroundColor,
           /* The opacity the bar settles at: a hidden test window draws no frames, so a transition never ends there. */
           barFaded: (() => { bar.style.transition = 'none'; const o = getComputedStyle(bar).opacity; bar.style.transition = ''; return o === '0'; })(),
-          boxed: cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && parseFloat(cs.borderTopWidth) >= 2,
+          /* The CSS edge is 2px; at 125% display scaling Chromium snaps it to 2 device pixels, which reads 1.6px. */
+          boxed: cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && parseFloat(cs.borderTopWidth) >= 1.5,
         };
       })()`);
 
