@@ -6975,6 +6975,26 @@ async function thumbnailOnce(fp, px) {
     clearTimeout(timer);
   }
 }
+/* An image should always get a thumbnail, so a failing image type is logged once when it starts failing and
+   once when it recovers, per extension. Per extension because Drive for Desktop registers its own provider
+   for .png and .bmp, loaded into this process, while .jpg uses Windows' own: a Drive fault fails only the
+   first two. Documents are left out, since most PDFs and Office files have no thumbnail at all. */
+const THUMB_WATCH_EXT = new Set(['.png', '.jpg', '.jpeg', '.bmp', '.webp']);
+const thumbFailingByExt = new Map();
+function noteImageThumbnail(fp, ok, err) {
+  const ext = path.extname(fp).toLowerCase();
+  if (!THUMB_WATCH_EXT.has(ext)) return;
+  const run = thumbFailingByExt.get(ext);
+  if (ok) {
+    if (!run) return;
+    thumbFailingByExt.delete(ext);
+    mainPerfLog(`thumbnail ok again ${ext} after ${run.n} failure(s) over ${Math.round((Date.now() - run.since) / 1000)}s`);
+  } else if (run) run.n++;
+  else {
+    thumbFailingByExt.set(ext, { since: Date.now(), n: 1 });
+    mainPerfLog(`thumbnail failing ${ext} "${err}" ${fp}`);
+  }
+}
 function makeThumbnail(fp, px) {
   const run = thumbnailQueue.then(async () => {
     // The Windows thumbnail cache fails intermittently ("local thumbnail cache reference") even for
@@ -6983,7 +7003,10 @@ function makeThumbnail(fp, px) {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const r = await thumbnailOnce(fp, px);
-        if (r.ok) return r;
+        if (r.ok) {
+          noteImageThumbnail(fp, true);
+          return r;
+        }
         lastErr = r.error;
       } catch (e) {
         lastErr = String((e && e.message) || e);
@@ -6994,6 +7017,7 @@ function makeThumbnail(fp, px) {
       }
       await sleep(100);
     }
+    noteImageThumbnail(fp, false, lastErr);
     return { ok: false, error: lastErr };
   });
   thumbnailQueue = run.then(() => {}, () => {});
