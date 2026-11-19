@@ -13,6 +13,8 @@ const IsWindow = user32.func('bool __stdcall IsWindow(HWND h)');
 const IsWindowVisible = user32.func('bool __stdcall IsWindowVisible(HWND h)');
 const IsIconic = user32.func('bool __stdcall IsIconic(HWND h)');
 const PostMessageW = user32.func('bool __stdcall PostMessageW(HWND h, uint32_t msg, uintptr_t w, intptr_t l)');
+const GetWindow = user32.func('HWND __stdcall GetWindow(HWND h, uint32_t cmd)');
+const GW_OWNER = 4;
 
 const LABEL = 'doctray check xkTODO.md';
 const TITLE = LABEL + ' — gmist';
@@ -66,6 +68,8 @@ const OTHER_URL = 'http://localhost:5173/open?path=' + encodeURIComponent('C:\\t
     });
     check(!!hwnd, `set up: the doc window is on screen ("${TITLE}")`);
     if (!hwnd) throw new Error('no doc window');
+    // An owned window is left out of the taskbar and every screen-share picker, so a gmist deck could not be shared.
+    check(!GetWindow(hwnd, GW_OWNER), 'a gmist window is top-level, not owned by Whippet, so a call can share it');
 
     PostMessageW(hwnd, 0x0112, 0xf020, 0); // WM_SYSCOMMAND SC_MINIMIZE, as the title-bar button sends
     t = await waitFor(async () => {

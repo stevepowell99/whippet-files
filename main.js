@@ -2337,12 +2337,14 @@ function setFileDialogTarget(target) {
   } catch (_) {}
 }
 
-/** Doc windows (gmist, Workspace) are owned by the main window, and Windows keeps an owned window above
+/** Workspace doc windows are owned by the main window, and Windows keeps an owned window above
  *  its owner, so raising TagFox from a global shortcut left the results hidden underneath them.
- *  Park them on every shortcut raise; each leaves its pill in the main window's doc tray to restore from. */
+ *  Park those on every shortcut raise; each leaves its pill in the main window's doc tray to restore from.
+ *  gmist windows are top-level (`topLevel` in WEB_EDITOR_KINDS), never under TagFox, so they stay put:
+ *  hiding one would black out a screen share of it mid-talk. */
 function minimiseWebEditorWindows() {
   for (const x of BrowserWindow.getAllWindows()) {
-    if (x && !x.isDestroyed() && x.webEditKind && x.isVisible() && !x.isMinimized()) parkWebEditorWindow(x);
+    if (x && !x.isDestroyed() && x.webEditKind && x.getParentWindow() && x.isVisible() && !x.isMinimized()) parkWebEditorWindow(x);
   }
 }
 
@@ -4049,6 +4051,9 @@ function isAllowedLocalGmistUrl(u) {
   }
 }
 
+/** gmist's speaker-notes popup (`SPEAKER_WINDOW_NAME` in gmist's app/lib/usePresent.ts). */
+const GMIST_SPEAKER_WINDOW_NAME = 'gmist-speaker';
+
 /** The deployed gmist worker. The renderer's GMIST_BASE_URL is the same origin, for the row's cloud pen. */
 const ONLINE_GMIST_ORIGIN = 'https://mist.broad-smoke-cc64.workers.dev';
 
@@ -4063,6 +4068,9 @@ function isOnlineGmistUrl(u) {
 /**
  * The child-window kinds. Everything site-specific lives here: which URLs the window may load,
  * its own cookie jar, its own remembered frame, and whether the Google-only Expand button shows.
+ * `topLevel`: not owned by the main window. Windows leaves an owned window out of the taskbar,
+ * Alt+Tab and every screen-share picker (Chrome's, so Meet and Teams, and Zoom's), so a gmist deck
+ * opened from here could not be shared in a call (Steve, 19 November 2026).
  */
 const WEB_EDITOR_KINDS = {
   googleWorkspace: {
@@ -4080,6 +4088,7 @@ const WEB_EDITOR_KINDS = {
      a plain view on localhost: no Google session, nothing to authenticate. */
   gmistLocal: {
     windowKindName: 'gmist',
+    topLevel: true,
     boundsFile: 'tagBrowser-gmist-local-bounds.json',
     partition: 'persist:tagfox-gmist-local',
     background: '#ffffff',
@@ -4093,6 +4102,7 @@ const WEB_EDITOR_KINDS = {
      pages are reachable from its address bar for the same reason as the Workspace window's. */
   gmistOnline: {
     windowKindName: 'gmist online',
+    topLevel: true,
     boundsFile: 'tagBrowser-gmist-online-bounds.json',
     partition: 'persist:tagfox-gmist-online',
     background: '#ffffff',
@@ -4513,8 +4523,17 @@ function mountWebEditorBrowserViews(win, targetUrlArg, useBounds, kind) {
 
   attachPageZoomShortcuts(contentBV.webContents);
   attachWebEditorContentNavigationSync(win, contentBV.webContents);
-  if (kind === WEB_EDITOR_KINDS.gmistLocal) {
-    contentBV.webContents.setWindowOpenHandler(({ url: openUrl }) => {
+  if (kind === WEB_EDITOR_KINDS.gmistLocal || kind === WEB_EDITOR_KINDS.gmistOnline) {
+    contentBV.webContents.setWindowOpenHandler(({ url: openUrl, frameName }) => {
+      /* gmist's Present opens its speaker notes in a popup by this name, where the browser has no
+         Document Picture-in-Picture: keep it floating over the shared deck window, as Chrome's PiP does. */
+      if (frameName === GMIST_SPEAKER_WINDOW_NAME) {
+        return {
+          action: 'allow',
+          overrideBrowserWindowOptions: { alwaysOnTop: true, autoHideMenuBar: true, backgroundColor: kind.background },
+        };
+      }
+      if (kind !== WEB_EDITOR_KINDS.gmistLocal) return { action: 'allow' };
       if (isOnlineGmistUrl(openUrl)) {
         offerOnlineGmistTarget(win, openUrl);
         return { action: 'deny' };
@@ -4576,7 +4595,7 @@ function openWebEditorWindow(parentWin, targetUrl, kindKey, { label } = {}) {
   const initW = Math.max(GOOGLE_WORKSPACE_WINDOW_MIN_W, use.width);
   const initH = Math.max(GOOGLE_WORKSPACE_WINDOW_MIN_H, use.height);
   const win = new BrowserWindow({
-    parent: parentWin || undefined,
+    parent: (!kind.topLevel && parentWin) || undefined,
     x: use.x,
     y: use.y,
     width: initW,

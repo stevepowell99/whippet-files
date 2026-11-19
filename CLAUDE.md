@@ -48,7 +48,8 @@ Do not duplicate these here; read them:
 - **Toggling TagFox in raises no overlay.** Do not reintroduce an on-show overlay.
 - **The window's × hides TagFox and never quits it** unless `appQuitting` is set (File → Quit TagFox, the `/` command, Windows' `query-session-end`). Guarded by `test/close-hides.cjs`, which posts a real `WM_CLOSE`.
 - **Ctrl+Shift+Space is a fixed third global shortcut** (`RECENT_CHANGES_ACCEL`, not in Settings): TagFox on the last hour's changes anywhere (`openRecentChanges()`).
-- **Every global-shortcut raise parks the doc windows first** (`minimiseWebEditorWindows`), since an owned window always sits above the main window.
+- **Every global-shortcut raise parks the owned doc windows first** (`minimiseWebEditorWindows`), since an owned window always sits above the main window.
+- **gmist windows are top-level, never owned** (`topLevel` in `WEB_EDITOR_KINDS`): Windows leaves an owned window out of the taskbar, Alt+Tab and every screen-share picker, so an owned gmist deck cannot be shared in a call. Do not give them a `parent`.
 - **The toggle shortcut pressed from another app's Open or Save dialog sends the next pick to that dialog** (`file-dialog-handoff.js`, `fileDialogTarget`; `docs/DEVELOPING.md` "Sending a pick to a file dialog"). Four rules are load-bearing:
   - Text goes only to the file-name box of the same dialog (same handle and process, found again at the moment of sending, and inside that dialog), by `WM_SETTEXT`, and is read back before anything is pressed.
   - The dialog's button is pressed (`WM_COMMAND` `IDOK`) only when it reads Open.
