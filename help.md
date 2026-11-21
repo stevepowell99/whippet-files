@@ -240,7 +240,7 @@ Whippet knows three kinds of tag, each with its own two-letter prefix:
 |---|---|---|
 | Status: what state the task is in | `xk` | `TODO`, `BLOCKING`, `WAITING`, `LATER` |
 | Owner: whose it is | `xp` | The names you set in **Settings**, under **Owner tags**, such as `SAM` for `xpSAM`. There are none until you add some. |
-| Label: what kind of thing it is | `xx` | `PUB`, `INFO`, `KEY` |
+| Label: what kind of thing it is | `xx` | `PUB`, `INFO`, `KEY`, `ASK` (a question waiting for an answer) |
 
 A word only counts as a tag with its own prefix: `xkTODO` is a tag, while `todo` in `todo list.txt` is just part of the name.
 

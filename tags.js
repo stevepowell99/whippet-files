@@ -18,7 +18,7 @@
   /** The fixed families: tag body -> family prefix. To add a status or label, add it here (and
    *  mirror it in CLAUDE.md / help.md). Owners are not fixed: see setOwnerTags. */
   const STATUS_TAGS = { TODO: 'xk', BLOCKING: 'xk', WAITING: 'xk', LATER: 'xk' };
-  const LABEL_TAGS = { PUB: 'xx', INFO: 'xx', KEY: 'xx' };
+  const LABEL_TAGS = { PUB: 'xx', INFO: 'xx', KEY: 'xx', ASK: 'xx' };
   const OWNER_PREFIX = 'xp';
 
   /**
