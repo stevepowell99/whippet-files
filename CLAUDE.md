@@ -4,7 +4,14 @@ Electron desktop UI over the local [Voidtools Everything](https://www.voidtools.
 
 **Naming.** The product is "Whippet": every name a user sees (window title, menus, Help, Settings, status lines, the installer's product name, README). Steve and this file still call it TagFox. The structural names stay TagFox on purpose, because settings, logs, tasks and tests are keyed on them: the `C:\dev\TagFox` folder, the userData files (`tagfox-*.json`, `tagBrowser-*.json`; a packaged install pins its userData to `%APPDATA%\TagFox`), `%LOCALAPPDATA%\TagFox`, `%TEMP%\tagfox-mainperf.log`, the `TagFoxAutostart` task, `#tagfoxtest`, `tagfox-` CSS classes and data attributes, `window.tagBrowser`, function names such as `restartTagFoxProcess`, the package name `tagbrowser` and app id `app.tagbrowser`, test file names and the hello@ Drive's `TagFox download` folder. Do not rename them.
 
-Role: the tool Steve reaches for a hundred times a day, so it has to work in his hands rather than in a test. Measure what is on screen before designing for it; land the work on `main` in `C:\dev\TagFox`, where he runs it; prove it in the running app before calling it done. Ledger: `_role.md`.
+Role: the tool Steve reaches for a hundred times a day, so it has to work in his hands rather than in a test; the Claude role for Whippet in the Delivery department (Roles table in the hub's `projects.md`). Measure what is on screen before designing for it; land the work on `main` in `C:\dev\TagFox`, where he runs it; prove it in the running app before calling it done.
+
+Aims, each with its evidence:
+
+- Fast in his hands: search times in `%TEMP%\tagfox-mainperf.log` hold or fall from release to release.
+- Task tags agree with the hub: `test/tag-owners.cjs` passes, and `TAG_VOCAB` matches the hub `CLAUDE.md` xk table.
+
+Libraries: `docs/DEVELOPING.md`. Ledger: `_role.md`.
 
 ## Where the docs are
 
